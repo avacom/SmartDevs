@@ -73,3 +73,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+obj
+Bin
+Debug
+Release
+*.suo
