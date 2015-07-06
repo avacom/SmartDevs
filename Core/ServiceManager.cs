@@ -47,9 +47,7 @@ namespace Core
                             ServiceHost host = new ServiceHost(serviceType, baseAddress);
 
                             WSDualHttpBinding binding = new WSDualHttpBinding();
-                            binding.Security.Mode = WSDualHttpSecurityMode.Message;
-                            binding.Security.Message.AlgorithmSuite = SecurityAlgorithmSuite.Basic256;
-                            binding.MessageEncoding = WSMessageEncoding.Mtom;
+                            binding.Security.Mode = WSDualHttpSecurityMode.None;
 
                             host.AddServiceEndpoint(contractType, binding, "");
 

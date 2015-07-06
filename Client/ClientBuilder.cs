@@ -51,9 +51,7 @@ namespace Client
                 log.TraceMessage(string.Format("Initialization parameters: port = {0}, host = {1}, url = {2}", port, host, path));
 
                 WSDualHttpBinding binding = new WSDualHttpBinding();
-                binding.Security.Mode = WSDualHttpSecurityMode.Message;
-                binding.Security.Message.AlgorithmSuite = SecurityAlgorithmSuite.Basic256;
-                binding.MessageEncoding = WSMessageEncoding.Mtom;
+                binding.Security.Mode = WSDualHttpSecurityMode.None;
 
                 log.TraceMessage(string.Format("Creating the channel factory for the service {0}", serviceID));
                 if (callbackObj != null)
