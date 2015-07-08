@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security;
 using System.Text;
@@ -28,7 +29,6 @@ namespace Core
         {
             Deinitialize();
             log.TraceMessage("Initializing services");
-            bool ret = true;
             config = new Config();
             if (config.Load(Constants.CONFIG_FILENAME))
             {
@@ -46,8 +46,16 @@ namespace Core
                             Uri baseAddress = new Uri(string.Format("http://{0}:{1}/{2}", config.Host, config.Port, s.Name));
                             ServiceHost host = new ServiceHost(serviceType, baseAddress);
 
-                            WSDualHttpBinding binding = new WSDualHttpBinding();
-                            binding.Security.Mode = WSDualHttpSecurityMode.None;
+                            Binding binding;
+                            if (s.Advanced)
+                            {
+                                binding = new WSDualHttpBinding();
+                                ((WSDualHttpBinding)binding).Security.Mode = WSDualHttpSecurityMode.None;
+                            }
+                            else
+                            {
+                                binding = new BasicHttpBinding();
+                            }
 
                             host.AddServiceEndpoint(contractType, binding, "");
 
