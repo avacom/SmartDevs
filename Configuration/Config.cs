@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Interfaces.DataContracts;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,16 +11,7 @@ namespace Configuration
 {
     public class Config
     {
-        public string Port { get; set; }
-        public string Host { get; set; }
-        public List<Service> Services { get; set; }
-
-        public Config()
-        {
-            Port = string.Empty;
-            Host = string.Empty;
-            Services = new List<Service>();
-        }
+        public Device CurrentDevice { get; set; }
 
         public bool Save(string fileName)
         {
@@ -53,6 +45,17 @@ namespace Configuration
                 Config loaded = (Config)obj;
                 LoadFromObject(loaded);
                 reader.Close();
+
+                if (string.IsNullOrEmpty(CurrentDevice.Host))
+                {
+                    CurrentDevice.Host = System.Net.Dns.GetHostName();
+                }
+
+                if (string.IsNullOrEmpty(CurrentDevice.Name))
+                {
+                    CurrentDevice.Name = Environment.MachineName;
+                }
+                Save(fileName);
             }
             catch
             {
@@ -66,9 +69,7 @@ namespace Configuration
         {
             if (obj != null)
             {
-                Port = obj.Port;
-                Host = obj.Host;
-                Services = obj.Services;
+                CurrentDevice = obj.CurrentDevice;
             }
         }
 

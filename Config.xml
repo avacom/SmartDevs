@@ -1,13 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Config>
-  <Port>9876</Port>
-  <Host>localhost</Host>
-  <Services>
-    <Service>
-      <Name>TestService</Name>
-      <Type>Services.TestService, Services</Type>
-      <Contract>Interfaces.ITestService, Interfaces</Contract>
-      <Advanced>false</Advanced>
-    </Service>
-  </Services>
+<Config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <CurrentDevice>
+    <Port>9876</Port>
+    <Host></Host>
+    <Name></Name>
+    <Services>
+      <Service>
+        <Name>TestService</Name>
+        <Type>Services.TestService, Services</Type>
+        <Contract>Interfaces.Services.ITestService, Interfaces</Contract>
+        <Advanced>false</Advanced>
+      </Service>
+    </Services>
+  </CurrentDevice>
 </Config>

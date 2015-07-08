@@ -1,5 +1,6 @@
 ﻿using Common;
 using Interfaces;
+using Interfaces.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

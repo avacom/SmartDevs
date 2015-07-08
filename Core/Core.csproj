@@ -45,6 +45,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Client\Client.csproj">
+      <Project>{2aa1639d-ae11-4a82-ab7c-bb149e0e53b5}</Project>
+      <Name>Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{fc198221-58d6-49be-a78f-faad80b475ff}</Project>
       <Name>Common</Name>
@@ -56,6 +60,10 @@
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
       <Project>{336e47c2-7977-4f23-bae3-76f1d41fce0a}</Project>
       <Name>Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Services\Services.csproj">
+      <Project>{9dadefc4-6f36-483b-b33a-40c22c80e7c7}</Project>
+      <Name>Services</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

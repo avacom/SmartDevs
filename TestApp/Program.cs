@@ -7,6 +7,8 @@ using Logger;
 using Core;
 using Interfaces;
 using Client;
+using Interfaces.Common;
+using Interfaces.Services;
 
 namespace TestApp
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Interfaces.DataContracts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
@@ -8,9 +9,9 @@ using System.Threading.Tasks;
 namespace Interfaces.Services
 {
     [ServiceContract]
-    public interface ITestService
+    public interface IConfigurationService
     {
         [OperationContract]
-        string GetString();
+        Device GetCurrentDevice();
     }
 }
