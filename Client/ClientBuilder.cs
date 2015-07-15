@@ -1,6 +1,7 @@
 ﻿using Common;
 using Interfaces;
 using Interfaces.Common;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,33 +16,32 @@ namespace Client
     public class ClientBuilder<T> : IDisposable
     {
         T proxy;
-        ILogger log;
+        ILogger log = LoggerManager.ConsoleLog;
 
         ChannelFactory<T> channelFactory;
 
-        public ClientBuilder(ILogger logger,  string serviceID, object callbackObj, string port, string host)
+        public ClientBuilder(string serviceID, object callbackObj, string port, string host)
         {
-            Initialize(logger, serviceID, callbackObj, port, host);
+            Initialize(serviceID, callbackObj, port, host);
         }
 
-        public ClientBuilder(ILogger logger, string serviceID, object callbackObj)
+        public ClientBuilder(string serviceID, object callbackObj)
         {
-            Initialize(logger, serviceID, callbackObj, Constants.DEFAULT_PORT, Constants.DEFAULT_HOST);
+            Initialize(serviceID, callbackObj, Constants.DEFAULT_PORT, Constants.DEFAULT_HOST);
         }
 
-        public ClientBuilder(ILogger logger, string serviceID, string port, string host)
+        public ClientBuilder(string serviceID, string port, string host)
         {
-            Initialize(logger, serviceID, null, port, host);
+            Initialize(serviceID, null, port, host);
         }
 
-        public ClientBuilder(ILogger logger, string serviceID)
+        public ClientBuilder(string serviceID)
         {
-            Initialize(logger, serviceID, null, Constants.DEFAULT_PORT, Constants.DEFAULT_HOST);
+            Initialize(serviceID, null, Constants.DEFAULT_PORT, Constants.DEFAULT_HOST);
         }
 
-        private bool Initialize(ILogger logger, string serviceID, object callbackObj, string port, string host)
+        private bool Initialize(string serviceID, object callbackObj, string port, string host)
         {
-            log = logger;
             bool ret = true;
             try
             {

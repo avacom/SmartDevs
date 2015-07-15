@@ -61,6 +61,10 @@
       <Project>{336e47c2-7977-4f23-bae3-76f1d41fce0a}</Project>
       <Name>Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Logger\Logger.csproj">
+      <Project>{a12e341c-0063-4f60-930c-fcd953fd6936}</Project>
+      <Name>Logger</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Services\Services.csproj">
       <Project>{9dadefc4-6f36-483b-b33a-40c22c80e7c7}</Project>
       <Name>Services</Name>

@@ -9,6 +9,7 @@ using Interfaces;
 using Client;
 using Interfaces.Common;
 using Interfaces.Services;
+using Interfaces.DataContracts;
 
 namespace TestApp
 {
@@ -16,12 +17,18 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            ILogger log = new ConsoleLogger();
-            ServiceManager m = new ServiceManager(log);
+            ServiceManager m = new ServiceManager();
             m.Initialize();
             Console.ReadKey();
-            ITestService s = new ClientBuilder<ITestService>(log, "TestService").Proxy;
-            Console.WriteLine(s.GetString());
+
+            Device d = new Device();
+            d.Host = "xtremelabs.org";
+            d.Port = "9876";
+
+            IAuditService s = new ClientBuilder<IAuditService>("AuditService").Proxy;
+
+            string pubKey = s.ExchangeKeys(d, "1213445");
+
             Console.ReadKey();
             m.Deinitialize();
         }

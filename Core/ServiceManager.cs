@@ -5,6 +5,7 @@ using Interfaces;
 using Interfaces.Common;
 using Interfaces.DataContracts;
 using Interfaces.Services;
+using Logger;
 using Services;
 using System;
 using System.Collections.Generic;
@@ -20,75 +21,72 @@ namespace Core
 {
     public class ServiceManager
     {
-        ILogger log;
-        Config config;
+        ILogger log = LoggerManager.ConsoleLog;
         List<ServiceHost> services;
 
-        public ServiceManager(ILogger logger)
+        public ServiceManager()
         {
-            log = logger;
             services = new List<ServiceHost>();
         }
 
         public void Initialize()
         {
             Deinitialize();
-            if (InitConfig())
+            
+            log.TraceMessage("Initializing services");
+
+            Device currDev = ConfigManager.Configuration.CurrentDevice;
+            if (currDev != null)
             {
-                log.TraceMessage("Initializing services");
-                IConfigurationService cs = new ClientBuilder<IConfigurationService>(log, "ConfigurationService").Proxy;
-                Device currDev = cs.GetCurrentDevice();
-                if (currDev != null)
+                foreach (Service s in currDev.Services)
                 {
-                    foreach (Service s in currDev.Services)
+                    Type serviceType = Type.GetType(string.Format(s.Type));
+                    Type contractType = Type.GetType(string.Format(s.Contract));
+
+                    log.TraceMessage(string.Format("Loading the service \"{0}\"", s.Type));
+
+                    try
                     {
-                        Type serviceType = Type.GetType(string.Format(s.Type));
-                        Type contractType = Type.GetType(string.Format(s.Contract));
-
-                        log.TraceMessage(string.Format("Loading the service \"{0}\"", s.Type));
-
-                        try
+                        if (serviceType != null && contractType != null)
                         {
-                            if (serviceType != null && contractType != null)
+                            Uri baseAddress = new Uri(string.Format("http://{0}:{1}/{2}", currDev.Host, currDev.Port, s.Name));
+                            ServiceHost host = new ServiceHost(serviceType, baseAddress);
+
+                            Binding binding;
+                            if (s.Advanced)
                             {
-                                Uri baseAddress = new Uri(string.Format("http://{0}:{1}/{2}", currDev.Host, currDev.Port, s.Name));
-                                ServiceHost host = new ServiceHost(serviceType, baseAddress);
-
-                                Binding binding;
-                                if (s.Advanced)
-                                {
-                                    binding = new WSDualHttpBinding();
-                                    ((WSDualHttpBinding)binding).Security.Mode = WSDualHttpSecurityMode.None;
-                                }
-                                else
-                                {
-                                    binding = new BasicHttpBinding();
-                                }
-
-                                host.AddServiceEndpoint(contractType, binding, "");
-
-                                ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
-                                smb.HttpGetEnabled = true;
-                                smb.MetadataExporter.PolicyVersion = PolicyVersion.Policy15;
-                                host.Description.Behaviors.Add(smb);
-
-                                host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexHttpBinding(), "mex");
-
-                                host.Open();
-
-                                services.Add(host);
+                                binding = new WSDualHttpBinding();
+                                ((WSDualHttpBinding)binding).Security.Mode = WSDualHttpSecurityMode.None;
                             }
                             else
                             {
-                                log.TraceMessage(string.Format("ERROR: cannot load the service \"{0}\". The type cannot be resolved", s.Type));
+                                binding = new BasicHttpBinding();
                             }
+
+                            host.AddServiceEndpoint(contractType, binding, "");
+
+                            ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
+                            smb.HttpGetEnabled = true;
+                            smb.MetadataExporter.PolicyVersion = PolicyVersion.Policy15;
+                            host.Description.Behaviors.Add(smb);
+
+                            host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexHttpBinding(), "mex");
+
+                            host.Open();
+
+                            services.Add(host);
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            log.TraceMessage(string.Format("ERROR: cannot load the service \"{0}\"", s.Type));
-                            log.TraceException(ex);
+                            log.TraceMessage(string.Format("ERROR: cannot load the service \"{0}\". The type cannot be resolved", s.Type));
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        log.TraceMessage(string.Format("ERROR: cannot load the service \"{0}\"", s.Type));
+                        log.TraceException(ex);
+                    }
+                    
                 }
                 log.TraceMessage("Services initialized");
             }
@@ -114,39 +112,6 @@ namespace Core
                 services.Clear();
                 log.TraceMessage("Services deinitialized");
             }
-        }
-
-        private bool InitConfig()
-        {
-            bool ret = true;
-            log.TraceMessage("Initializing the configuration service");
-            try
-            {
-                Uri baseAddress = new Uri("http://localhost:9876/ConfigurationService");
-                ServiceHost host = new ServiceHost(typeof(ConfigurationService), baseAddress);
-
-                BasicHttpBinding binding = new BasicHttpBinding();
-
-                host.AddServiceEndpoint(typeof(IConfigurationService), binding, "");
-
-                ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
-                smb.HttpGetEnabled = true;
-                smb.MetadataExporter.PolicyVersion = PolicyVersion.Policy15;
-                host.Description.Behaviors.Add(smb);
-
-                host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexHttpBinding(), "mex");
-
-                host.Open();
-
-                services.Add(host);
-            }
-            catch (Exception ex)
-            {
-                log.TraceMessage("ERROR: cannot load the configuration service");
-                log.TraceException(ex);
-            }
-
-            return ret;
         }
     }
 }

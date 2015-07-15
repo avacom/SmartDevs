@@ -34,6 +34,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,11 +42,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationService\ConfigurationService.cs" />
+    <Compile Include="AuditService\AuditService.cs" />
     <Compile Include="TestService\TestService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Client\Client.csproj">
+      <Project>{2aa1639d-ae11-4a82-ab7c-bb149e0e53b5}</Project>
+      <Name>Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{fc198221-58d6-49be-a78f-faad80b475ff}</Project>
       <Name>Common</Name>
@@ -53,6 +58,10 @@
     <ProjectReference Include="..\Configuration\Configuration.csproj">
       <Project>{936064ef-2f94-4291-9883-890feaadece5}</Project>
       <Name>Configuration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Encryption\Encryption.csproj">
+      <Project>{6870431f-5348-4c00-b28b-c4869e4af41b}</Project>
+      <Name>Encryption</Name>
     </ProjectReference>
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
       <Project>{336e47c2-7977-4f23-bae3-76f1d41fce0a}</Project>

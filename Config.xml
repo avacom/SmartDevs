@@ -11,6 +11,12 @@
         <Contract>Interfaces.Services.ITestService, Interfaces</Contract>
         <Advanced>false</Advanced>
       </Service>
+      <Service>
+        <Name>AuditService</Name>
+        <Type>Services.AuditService, Services</Type>
+        <Contract>Interfaces.Services.IAuditService, Interfaces</Contract>
+        <Advanced>false</Advanced>
+      </Service>
     </Services>
   </CurrentDevice>
 </Config>

@@ -11,9 +11,73 @@ namespace Configuration
 {
     public class Config
     {
-        public Device CurrentDevice { get; set; }
+        Device _currentDevice;
+        public Device CurrentDevice 
+        { 
+            get 
+            {
+                return _currentDevice; 
+            } 
+            set 
+            {
+                _currentDevice = value; 
+                Save(fileName); 
+            } 
+        }
+        string _publicKey;
+        public string PublicKey 
+        { 
+            get 
+            {
+                return _publicKey; 
+            } 
+            set 
+            {
+                _publicKey = value; 
+                Save(fileName); 
+            } 
+        }
+        string _privateKey;
+        public string PrivateKey 
+        { 
+            get 
+            {
+                return _privateKey; 
+            } 
+            set 
+            {
+                _privateKey = value; 
+                Save(fileName); 
+            } 
+        }
 
-        public bool Save(string fileName)
+        List<DeviceCredentials> _pairedDevices;
+        public List<DeviceCredentials> PairedDevices 
+        { 
+            get 
+            {
+                return _pairedDevices; 
+            } 
+            set 
+            {
+                _pairedDevices = value; 
+                Save(fileName); 
+            } 
+        }
+
+        string fileName;
+
+        public Config(string FileName)
+        {
+            fileName = FileName;
+            Load(fileName);
+        }
+
+        public Config()
+        {
+            fileName = string.Empty;
+        }
+        private bool Save(string fileName)
         {
             bool ret = Validate();
             if (ret)
@@ -34,7 +98,12 @@ namespace Configuration
             return ret;
         }
 
-        public bool Load(string fileName)
+        public bool Save()
+        {
+            return Save(fileName);
+        }
+
+        private bool Load(string fileName)
         {
             bool ret = true;
             try
@@ -69,7 +138,10 @@ namespace Configuration
         {
             if (obj != null)
             {
-                CurrentDevice = obj.CurrentDevice;
+                _currentDevice = obj.CurrentDevice;
+                _privateKey = obj.PrivateKey;
+                _publicKey = obj.PublicKey;
+                _pairedDevices = obj.PairedDevices;
             }
         }
 

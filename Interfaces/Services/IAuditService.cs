@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace Interfaces.Services
 {
     [ServiceContract]
-    public interface IConfigurationService
+    public interface IAuditService
     {
         [OperationContract]
-        Device GetCurrentDevice();
+        string ExchangeKeys(Device device, string publicKey);
     }
 }

@@ -18,5 +18,16 @@ namespace Interfaces.DataContracts
         public string Name { get; set; }
         [DataMember]
         public List<Service> Services { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            bool ret = false;
+            if (obj is Device)
+            {
+                Device d = obj as Device;
+                ret = Host == d.Host && Port == d.Port && Name == d.Name;
+            }
+            return ret;
+        }
     }
 }
