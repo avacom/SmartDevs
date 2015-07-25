@@ -11,6 +11,8 @@ namespace Interfaces.DataContracts
     public class Device
     {
         [DataMember]
+        public string ID { get; set; }
+        [DataMember]
         public string Port { get; set; }
         [DataMember]
         public string Host { get; set; }
@@ -25,7 +27,7 @@ namespace Interfaces.DataContracts
             if (obj is Device)
             {
                 Device d = obj as Device;
-                ret = Host == d.Host && Port == d.Port && Name == d.Name;
+                ret = ID == d.ID && Host == d.Host && Port == d.Port && Name == d.Name;
             }
             return ret;
         }

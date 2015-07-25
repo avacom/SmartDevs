@@ -13,5 +13,9 @@ namespace Interfaces.Services
     {
         [OperationContract]
         string ExchangeKeys(Device device, string publicKey);
+        [OperationContract]
+        bool Authorize(Device device, int accessLvl, string token);
+        [OperationContract]
+        bool Register(Device device, string encryptedPwd);
     }
 }

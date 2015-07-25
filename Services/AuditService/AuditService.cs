@@ -59,6 +59,28 @@ namespace Services
             return ret;
         }
 
+        public bool Authorize(Device device, int accessLvl, string token)
+        {
+            bool ret = true;
+            int al = ConfigManager.Configuration.GetAccessLevel(token);
+            if (al == 1)
+            {
+                ret = ConfigManager.Configuration.SetAccessLevelForDevice(device, accessLvl);
+            }
+            else
+            {
+                ret = false;
+            }
+            return ret;
+        }
+
+        public bool Register(Device device, string encryptedPwd)
+        {
+            bool ret = true;
+            ret = ConfigManager.Configuration.InitPassword(device, encryptedPwd);
+            return ret;
+        }
+
         private void SetPairedDeviceKey(Device device, string pubKey)
         {
             bool found = false;
@@ -76,13 +98,13 @@ namespace Services
             {
                 DeviceCredentials dc = new DeviceCredentials();
                 dc.PairedDevice = device;
-                dc.Authorized = false;
+                dc.AccessLevel = 0;
                 dc.PublicKey = pubKey;
 
                 if (device == CurrentDevice && publicKey == pubKey)
                 {
                     dc.Password = Membership.GeneratePassword(Constants.PWD_LENGTH, Constants.NON_ALPHANUMERIC_CHARS_CNT);
-                    dc.Authorized = true;
+                    dc.AccessLevel = 1;
                 }
                 PairedDevices.Add(dc);
             }

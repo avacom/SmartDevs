@@ -1,9 +1,15 @@
-﻿using System;
+﻿using Interfaces.DataContracts;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace Encryption
 {
@@ -26,7 +32,7 @@ namespace Encryption
             return Convert.ToBase64String(encrypted);
         }
 
-        public static byte[] Encrypt(byte[] data, int keySize, string publicKeyXml)
+        private static byte[] Encrypt(byte[] data, int keySize, string publicKeyXml)
         {
             if (data == null || data.Length == 0) throw new ArgumentException("Data are empty", "data");
             int maxLength = GetMaxDataLength(keySize);
@@ -47,7 +53,7 @@ namespace Encryption
             return Encoding.UTF8.GetString(decrypted);
         }
 
-        public static byte[] Decrypt(byte[] data, int keySize, string publicAndPrivateKeyXml)
+        private static byte[] Decrypt(byte[] data, int keySize, string publicAndPrivateKeyXml)
         {
             if (data == null || data.Length == 0) throw new ArgumentException("Data are empty", "data");
             if (!IsKeySizeValid(keySize)) throw new ArgumentException("Key size is not valid", "keySize");
@@ -60,7 +66,7 @@ namespace Encryption
             }
         }
 
-        public static int GetMaxDataLength(int keySize)
+        private static int GetMaxDataLength(int keySize)
         {
             if (_optimalAsymmetricEncryptionPadding)
             {
@@ -69,11 +75,56 @@ namespace Encryption
             return ((keySize - 384) / 8) + 37;
         }
 
-        public static bool IsKeySizeValid(int keySize)
+        private static bool IsKeySizeValid(int keySize)
         {
             return keySize >= 384 &&
                     keySize <= 16384 &&
                     keySize % 8 == 0;
+        }
+
+        public static string EncryptCredentials(Token token, int keySize, string publicKey)
+        {
+            if (token != null)
+            {
+                try
+                {
+                    string xmlStr = string.Empty;
+                    using (TextWriter xml = new StringWriter())
+                    {
+                        var serializer = new XmlSerializer(typeof(Token));
+                        serializer.Serialize(xml, token);
+                        xmlStr = ((StringWriter)xml).ToString();
+                    }
+
+                    return EncryptText(xmlStr, keySize, publicKey);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static Token DecryptCredentials(string creds, int keySize, string privateKey)
+        {
+            Token token = null;
+            try
+            {
+                string decodedCreds = DecryptText(creds, keySize, privateKey);
+                XmlSerializer deserializer = new XmlSerializer(typeof(Token));
+                TextReader reader = new StringReader(decodedCreds);
+                object obj = deserializer.Deserialize(reader);
+                token = (Token)obj;
+            }
+            catch
+            {
+                ;
+            }
+            return token;
         }
     }
 }

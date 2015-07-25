@@ -49,6 +49,10 @@
       <Project>{fc198221-58d6-49be-a78f-faad80b475ff}</Project>
       <Name>Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Encryption\Encryption.csproj">
+      <Project>{6870431f-5348-4c00-b28b-c4869e4af41b}</Project>
+      <Name>Encryption</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
       <Project>{336e47c2-7977-4f23-bae3-76f1d41fce0a}</Project>
       <Name>Interfaces</Name>

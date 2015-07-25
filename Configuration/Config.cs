@@ -1,4 +1,6 @@
-﻿using Interfaces.DataContracts;
+﻿using Common;
+using Encryption;
+using Interfaces.DataContracts;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -124,6 +126,11 @@ namespace Configuration
                 {
                     CurrentDevice.Name = Environment.MachineName;
                 }
+
+                if (string.IsNullOrEmpty(CurrentDevice.ID))
+                {
+                    CurrentDevice.ID = Guid.NewGuid().ToString();
+                }
                 Save(fileName);
             }
             catch
@@ -148,6 +155,85 @@ namespace Configuration
         bool Validate()
         {
             return true;
+        }
+
+        public int GetAccessLevel(string token)
+        {
+            int ret = 0;
+            try
+            {
+                Token t = AsymmetricEncryption.DecryptCredentials(token, Constants.KEY_SIZE, PrivateKey);
+                DeviceCredentials pd = GetPairedDevice(t);
+                if (pd != null)
+                {
+                    ret = pd.AccessLevel;
+                }
+            }
+            catch
+            {
+                ret = 0;
+            }
+            return ret;
+        }
+
+        public DeviceCredentials GetPairedDevice(Token t)
+        {
+            DeviceCredentials dc = null;
+            if (t != null)
+            {
+                dc = PairedDevices.First(pd => pd.PairedDevice.ID == t.DeviceID && pd.Password == t.Password);
+            }
+            return dc;
+        }
+
+        public DeviceCredentials GetPairedDevice(Device device)
+        {
+            DeviceCredentials dc = null;
+            if (device != null)
+            {
+                dc = PairedDevices.First(pd => pd.PairedDevice.Equals(device));
+            }
+            return dc;
+        }
+
+        public bool SetAccessLevelForDevice(Device device, int accessLvl)
+        {
+            bool ret = true;
+            DeviceCredentials pd = GetPairedDevice(device);
+            if (pd != null)
+            {
+                pd.AccessLevel = accessLvl;
+                ret = Save(fileName);
+            }
+            else
+            {
+                ret = false;
+            }
+            return ret;
+        }
+
+        public bool InitPassword(Device device, string encyptedPwd)
+        {
+            bool ret = true;
+            try
+            {
+                DeviceCredentials pd = GetPairedDevice(device);
+                if (pd != null && string.IsNullOrEmpty(pd.Password) && pd.AccessLevel == 0)
+                {
+                    string pwd = AsymmetricEncryption.DecryptText(encyptedPwd, Constants.KEY_SIZE, PrivateKey);
+                    pd.Password = pwd;
+                    ret = Save(fileName);
+                }
+                else
+                {
+                    ret = false;
+                }
+            }
+            catch
+            {
+                ret = false;
+            }
+            return ret;
         }
     }
 }

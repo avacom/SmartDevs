@@ -10,6 +10,8 @@ using Client;
 using Interfaces.Common;
 using Interfaces.Services;
 using Interfaces.DataContracts;
+using Encryption;
+using Common;
 
 namespace TestApp
 {
@@ -21,13 +23,19 @@ namespace TestApp
             m.Initialize();
             Console.ReadKey();
 
-            Device d = new Device();
-            d.Host = "xtremelabs.org";
-            d.Port = "9876";
+            Device d = Configuration.ConfigManager.Configuration.CurrentDevice;
 
             IAuditService s = new ClientBuilder<IAuditService>("AuditService").Proxy;
 
             string pubKey = s.ExchangeKeys(d, "1213445");
+
+            Token t = new Token();
+            t.DeviceID = d.ID;
+            t.Password = "ololololshto111";
+
+            string coded = AsymmetricEncryption.EncryptCredentials(t, Constants.KEY_SIZE, Configuration.ConfigManager.Configuration.PublicKey);
+
+            Token decoded = AsymmetricEncryption.DecryptCredentials(coded, Constants.KEY_SIZE, Configuration.ConfigManager.Configuration.PrivateKey);
 
             Console.ReadKey();
             m.Deinitialize();

@@ -53,9 +53,21 @@
       <Project>{2aa1639d-ae11-4a82-ab7c-bb149e0e53b5}</Project>
       <Name>Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{fc198221-58d6-49be-a78f-faad80b475ff}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Configuration\Configuration.csproj">
+      <Project>{936064ef-2f94-4291-9883-890feaadece5}</Project>
+      <Name>Configuration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{2e2ec659-aa9c-4e90-ba77-a23159997cec}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Encryption\Encryption.csproj">
+      <Project>{6870431f-5348-4c00-b28b-c4869e4af41b}</Project>
+      <Name>Encryption</Name>
     </ProjectReference>
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
       <Project>{336e47c2-7977-4f23-bae3-76f1d41fce0a}</Project>

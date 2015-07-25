@@ -46,6 +46,7 @@
     <Compile Include="DataContracts\Device.cs" />
     <Compile Include="DataContracts\DeviceCredentials.cs" />
     <Compile Include="DataContracts\Service.cs" />
+    <Compile Include="DataContracts\Token.cs" />
     <Compile Include="Services\IAuditService.cs" />
     <Compile Include="Services\ITestService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
