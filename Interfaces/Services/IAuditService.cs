@@ -16,6 +16,8 @@ namespace Interfaces.Services
         [OperationContract]
         bool Authorize(Device device, int accessLvl, string token);
         [OperationContract]
-        bool Register(Device device, string encryptedPwd);
+        bool SetPassword(Device device, string oldPwdEncrypted, string newPwdEncrypted);
+        [OperationContract]
+        Device GetDeviceInfo();
     }
 }

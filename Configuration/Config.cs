@@ -1,6 +1,7 @@
 ﻿using Common;
 using Encryption;
 using Interfaces.DataContracts;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +24,7 @@ namespace Configuration
             set 
             {
                 _currentDevice = value; 
-                Save(fileName); 
+                Save(_fileName); 
             } 
         }
         string _publicKey;
@@ -36,7 +37,7 @@ namespace Configuration
             set 
             {
                 _publicKey = value; 
-                Save(fileName); 
+                Save(_fileName); 
             } 
         }
         string _privateKey;
@@ -49,8 +50,22 @@ namespace Configuration
             set 
             {
                 _privateKey = value; 
-                Save(fileName); 
+                Save(_fileName); 
             } 
+        }
+
+        bool _isServer;
+        public bool IsServer
+        {
+            get
+            {
+                return _isServer;
+            }
+            set
+            {
+                _isServer = value;
+                Save(_fileName);
+            }
         }
 
         List<DeviceCredentials> _pairedDevices;
@@ -63,46 +78,56 @@ namespace Configuration
             set 
             {
                 _pairedDevices = value; 
-                Save(fileName); 
+                Save(_fileName); 
             } 
         }
 
-        string fileName;
+        string _fileName;
 
-        public Config(string FileName)
+        public Config(string fileName)
         {
-            fileName = FileName;
+            _fileName = fileName;
             Load(fileName);
         }
 
         public Config()
         {
-            fileName = string.Empty;
+            _fileName = string.Empty;
         }
         private bool Save(string fileName)
         {
             bool ret = Validate();
-            if (ret)
+            if (!string.IsNullOrEmpty(fileName))
             {
-                try
+                if (ret)
                 {
-                    XmlSerializer serializer = new XmlSerializer(typeof(Config));
-                    using (TextWriter writer = new StreamWriter(fileName))
+                    try
                     {
-                        serializer.Serialize(writer, this);
+                        XmlSerializer serializer = new XmlSerializer(typeof(Config));
+                        using (TextWriter writer = new StreamWriter(fileName))
+                        {
+                            serializer.Serialize(writer, this);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggerManager.Log.TraceMessage(string.Format("ERROR: cannot save {0}", fileName));
+                        LoggerManager.Log.TraceException(ex);
+                        ret = false;
                     }
                 }
-                catch
-                {
-                    ret = false;
-                }
             }
+            else
+            {
+                ret = false;
+            }
+
             return ret;
         }
 
         public bool Save()
         {
-            return Save(fileName);
+            return Save(_fileName);
         }
 
         private bool Load(string fileName)
@@ -133,8 +158,10 @@ namespace Configuration
                 }
                 Save(fileName);
             }
-            catch
+            catch(Exception ex)
             {
+                LoggerManager.Log.TraceMessage(string.Format("ERROR: cannot load {0}", fileName));
+                LoggerManager.Log.TraceException(ex);
                 ret = false;
             }
 
@@ -149,6 +176,7 @@ namespace Configuration
                 _privateKey = obj.PrivateKey;
                 _publicKey = obj.PublicKey;
                 _pairedDevices = obj.PairedDevices;
+                _isServer = obj.IsServer;
             }
         }
 
@@ -169,8 +197,10 @@ namespace Configuration
                     ret = pd.AccessLevel;
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                LoggerManager.Log.TraceMessage("ERROR: cannot get the access level");
+                LoggerManager.Log.TraceException(ex);
                 ret = 0;
             }
             return ret;
@@ -181,8 +211,15 @@ namespace Configuration
             DeviceCredentials dc = null;
             if (t != null)
             {
-                dc = PairedDevices.First(pd => pd.PairedDevice.ID == t.DeviceID && pd.Password == t.Password);
+                dc = PairedDevices.FirstOrDefault(pd => pd.PairedDevice.ID == t.DeviceID && pd.Password == t.Password);
             }
+            return dc;
+        }
+
+        public DeviceCredentials GetPairedDevice(string host, string port)
+        {
+            DeviceCredentials dc = null;
+            dc = PairedDevices.FirstOrDefault(pd => pd.PairedDevice.Host.ToLower() == host.ToLower() && pd.PairedDevice.Port == port);
             return dc;
         }
 
@@ -191,7 +228,7 @@ namespace Configuration
             DeviceCredentials dc = null;
             if (device != null)
             {
-                dc = PairedDevices.First(pd => pd.PairedDevice.Equals(device));
+                dc = PairedDevices.FirstOrDefault(pd => pd.PairedDevice.Equals(device));
             }
             return dc;
         }
@@ -203,7 +240,7 @@ namespace Configuration
             if (pd != null)
             {
                 pd.AccessLevel = accessLvl;
-                ret = Save(fileName);
+                ret = Save(_fileName);
             }
             else
             {
@@ -212,25 +249,68 @@ namespace Configuration
             return ret;
         }
 
-        public bool InitPassword(Device device, string encyptedPwd)
+        public bool SetServer(Device device)
+        {
+            bool ret = true;
+            DeviceCredentials target = GetPairedDevice(device);
+            ret = SetServer(target);
+            return ret;
+        }
+
+        public bool SetServer(DeviceCredentials devCred)
+        {
+            bool ret = true;
+            if (devCred != null && PairedDevices.Contains(devCred))
+            {
+                DeviceCredentials srv = GetServer();
+                if (srv != null)
+                {
+                    srv.IsServer = false;
+                }
+                devCred.IsServer = true;
+            }
+            else
+            {
+                ret = false;
+            }
+            ret = Save(_fileName);
+            return ret;
+        }
+
+        public DeviceCredentials GetServer()
+        {
+            return PairedDevices.FirstOrDefault(dc => dc.IsServer);
+        }
+
+        public bool SetPassword(Device device, string oldPwdEncrypted, string newPwdEncrypted)
         {
             bool ret = true;
             try
             {
                 DeviceCredentials pd = GetPairedDevice(device);
-                if (pd != null && string.IsNullOrEmpty(pd.Password) && pd.AccessLevel == 0)
+                if (pd != null)
                 {
-                    string pwd = AsymmetricEncryption.DecryptText(encyptedPwd, Constants.KEY_SIZE, PrivateKey);
-                    pd.Password = pwd;
-                    ret = Save(fileName);
+                    if (pd != null &&
+                            (
+                                (string.IsNullOrEmpty(oldPwdEncrypted) && string.IsNullOrEmpty(pd.Password)) ||
+                                (AsymmetricEncryption.DecryptText(oldPwdEncrypted, Constants.KEY_SIZE, PrivateKey) == pd.Password)
+                            )
+                        )
+                    {
+                        string pwd = AsymmetricEncryption.DecryptText(newPwdEncrypted, Constants.KEY_SIZE, PrivateKey);
+                        pd.Password = pwd;
+                        ret = Save(_fileName);
+                    }
                 }
                 else
                 {
                     ret = false;
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                LoggerManager.Log.TraceMessage(string.Format("ERROR: cannot set a password for a device {0} {1}", device.Name, device.ID));
+                LoggerManager.Log.TraceException(ex);
                 ret = false;
             }
             return ret;

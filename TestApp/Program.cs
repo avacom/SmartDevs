@@ -21,22 +21,8 @@ namespace TestApp
         {
             ServiceManager m = new ServiceManager();
             m.Initialize();
-            Console.ReadKey();
-
-            Device d = Configuration.ConfigManager.Configuration.CurrentDevice;
-
-            IAuditService s = new ClientBuilder<IAuditService>("AuditService").Proxy;
-
-            string pubKey = s.ExchangeKeys(d, "1213445");
-
-            Token t = new Token();
-            t.DeviceID = d.ID;
-            t.Password = "ololololshto111";
-
-            string coded = AsymmetricEncryption.EncryptCredentials(t, Constants.KEY_SIZE, Configuration.ConfigManager.Configuration.PublicKey);
-
-            Token decoded = AsymmetricEncryption.DecryptCredentials(coded, Constants.KEY_SIZE, Configuration.ConfigManager.Configuration.PrivateKey);
-
+            //AuditHelper h = new AuditHelper();
+            //h.RegisterDevice("Sangreal", "6789");
             Console.ReadKey();
             m.Deinitialize();
         }

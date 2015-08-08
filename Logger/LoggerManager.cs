@@ -9,6 +9,7 @@ namespace Logger
 {
     public static class LoggerManager
     {
-        public static ConsoleLogger ConsoleLog = new ConsoleLogger();
+        //public static ConsoleLogger ConsoleLog = new ConsoleLogger();
+        public static ILogger Log = new ConsoleLogger();
     }
 }

@@ -21,7 +21,7 @@ namespace Core
 {
     public class ServiceManager
     {
-        ILogger log = LoggerManager.ConsoleLog;
+        
         List<ServiceHost> services;
 
         public ServiceManager()
@@ -33,7 +33,7 @@ namespace Core
         {
             Deinitialize();
             
-            log.TraceMessage("Initializing services");
+            LoggerManager.Log.TraceMessage("Initializing services");
 
             Device currDev = ConfigManager.Configuration.CurrentDevice;
             if (currDev != null)
@@ -43,7 +43,7 @@ namespace Core
                     Type serviceType = Type.GetType(string.Format(s.Type));
                     Type contractType = Type.GetType(string.Format(s.Contract));
 
-                    log.TraceMessage(string.Format("Loading the service \"{0}\"", s.Type));
+                    LoggerManager.Log.TraceMessage(string.Format("Loading the service \"{0}\"", s.Type));
 
                     try
                     {
@@ -78,17 +78,17 @@ namespace Core
                         }
                         else
                         {
-                            log.TraceMessage(string.Format("ERROR: cannot load the service \"{0}\". The type cannot be resolved", s.Type));
+                            LoggerManager.Log.TraceMessage(string.Format("ERROR: cannot load the service \"{0}\". The type cannot be resolved", s.Type));
                         }
                     }
                     catch (Exception ex)
                     {
-                        log.TraceMessage(string.Format("ERROR: cannot load the service \"{0}\"", s.Type));
-                        log.TraceException(ex);
+                        LoggerManager.Log.TraceMessage(string.Format("ERROR: cannot load the service \"{0}\"", s.Type));
+                        LoggerManager.Log.TraceException(ex);
                     }
                     
                 }
-                log.TraceMessage("Services initialized");
+                LoggerManager.Log.TraceMessage("Services initialized");
             }
         }
 
@@ -96,7 +96,7 @@ namespace Core
         {
             if (services != null && services.Count > 0)
             {
-                log.TraceMessage("Deinitializing services");
+                LoggerManager.Log.TraceMessage("Deinitializing services");
                 foreach (ServiceHost h in services)
                 {
                     try
@@ -105,12 +105,12 @@ namespace Core
                     }
                     catch (Exception ex)
                     {
-                        log.TraceMessage("ERROR during the service deinitialization");
-                        log.TraceException(ex);
+                        LoggerManager.Log.TraceMessage("ERROR during the service deinitialization");
+                        LoggerManager.Log.TraceException(ex);
                     }
                 }
                 services.Clear();
-                log.TraceMessage("Services deinitialized");
+                LoggerManager.Log.TraceMessage("Services deinitialized");
             }
         }
     }

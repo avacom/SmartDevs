@@ -26,6 +26,8 @@ namespace Interfaces.DataContracts
         public int AccessLevel { get; set; }
         [DataMember]
         public bool Online { get; set; }
+        [DataMember]
+        public bool IsServer { get; set; }
 
         public Token GetToken()
         {

@@ -35,6 +35,11 @@ namespace Services
             ExchangeKeysWithPairedDevices();
         }
 
+        public Device GetDeviceInfo()
+        {
+            return CurrentDevice;
+        }
+
         private void ExchangeKeysWithPairedDevices()
         {
             foreach(DeviceCredentials dc in PairedDevices)
@@ -74,32 +79,23 @@ namespace Services
             return ret;
         }
 
-        public bool Register(Device device, string encryptedPwd)
+        public bool SetPassword(Device device, string oldPwdEncrypted, string newPwdEncrypted)
         {
             bool ret = true;
-            ret = ConfigManager.Configuration.InitPassword(device, encryptedPwd);
+            ret = ConfigManager.Configuration.SetPassword(device, oldPwdEncrypted, newPwdEncrypted);
             return ret;
         }
 
         private void SetPairedDeviceKey(Device device, string pubKey)
         {
             bool found = false;
-            foreach(DeviceCredentials c in PairedDevices)
-            {
-                if (c.PairedDevice.Equals(device))
-                {
-                    found = true;
-                    c.PublicKey = pubKey;
-                    break;
-                }
-            }
+            DeviceCredentials dc = ConfigManager.Configuration.GetPairedDevice(device);
 
-            if (!found)
+            if (dc == null)
             {
-                DeviceCredentials dc = new DeviceCredentials();
+                dc = new DeviceCredentials();
                 dc.PairedDevice = device;
                 dc.AccessLevel = 0;
-                dc.PublicKey = pubKey;
 
                 if (device == CurrentDevice && publicKey == pubKey)
                 {
@@ -109,6 +105,11 @@ namespace Services
                 PairedDevices.Add(dc);
             }
 
+            dc.PublicKey = pubKey;
+            if (dc.PairedDevice == CurrentDevice && dc.PublicKey == publicKey && ConfigManager.Configuration.IsServer)
+            {
+                ConfigManager.Configuration.SetServer(dc);
+            }
             ConfigManager.Configuration.Save();
         }
     }

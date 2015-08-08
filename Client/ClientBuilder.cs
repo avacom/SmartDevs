@@ -16,7 +16,6 @@ namespace Client
     public class ClientBuilder<T> : IDisposable
     {
         T proxy;
-        ILogger log = LoggerManager.ConsoleLog;
 
         ChannelFactory<T> channelFactory;
 
@@ -47,16 +46,16 @@ namespace Client
             {
                 
                 string msg = callbackObj == null ? "Initializing the client channel for the service {0}" : "Initializing the client duplex channel for the service {0}";
-                log.TraceMessage(string.Format(msg, serviceID));
+                LoggerManager.Log.TraceMessage(string.Format(msg, serviceID));
                 string path = string.Format("http://{0}:{1}/{2}", host, port, serviceID);
 
-                log.TraceMessage(string.Format("Initialization parameters: port = {0}, host = {1}, url = {2}", port, host, path));
+                LoggerManager.Log.TraceMessage(string.Format("Initialization parameters: port = {0}, host = {1}, url = {2}", port, host, path));
                 ServiceEndpointCollection endpoints = MetadataResolver.Resolve(typeof(T), new Uri(string.Format("{0}?wsdl", path)), MetadataExchangeClientMode.HttpGet);
                 if (endpoints != null && endpoints.Count > 0)
                 {
                     ServiceEndpoint endpoint = endpoints[0];
 
-                    log.TraceMessage(string.Format("Creating the channel factory for the service {0}", serviceID));
+                    LoggerManager.Log.TraceMessage(string.Format("Creating the channel factory for the service {0}", serviceID));
                     if (callbackObj != null)
                     {
                         channelFactory = new DuplexChannelFactory<T>(
@@ -73,27 +72,27 @@ namespace Client
 
                     if (channelFactory != null)
                     {
-                        log.TraceMessage(string.Format("Channel factory for the service {0} created", serviceID));
-                        log.TraceMessage(string.Format("Generating the proxy for the service {0}", serviceID));
+                        LoggerManager.Log.TraceMessage(string.Format("Channel factory for the service {0} created", serviceID));
+                        LoggerManager.Log.TraceMessage(string.Format("Generating the proxy for the service {0}", serviceID));
                         proxy = channelFactory.CreateChannel();
-                        log.TraceMessage(string.Format("The proxy for the service {0} created", serviceID));
+                        LoggerManager.Log.TraceMessage(string.Format("The proxy for the service {0} created", serviceID));
                     }
                     else
                     {
-                        log.TraceMessage(string.Format("Failed to create the channel factory for the service {0}!!!", serviceID));
+                        LoggerManager.Log.TraceMessage(string.Format("Failed to create the channel factory for the service {0}!!!", serviceID));
                         ret = false;
                     }
                 }
                 else
                 {
-                    log.TraceMessage(string.Format("Service {0} contains no end points", serviceID));
+                    LoggerManager.Log.TraceMessage(string.Format("Service {0} contains no end points", serviceID));
                     ret = false;
                 }
             }
             catch (Exception ex)
             {
-                log.TraceMessage(string.Format("Unable to initialize the client channel for the service {0}!!!", serviceID));
-                log.TraceException(ex);
+                LoggerManager.Log.TraceMessage(string.Format("Unable to initialize the client channel for the service {0}!!!", serviceID));
+                LoggerManager.Log.TraceException(ex);
                 ret = false;
             }
             return ret;
