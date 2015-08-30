@@ -36,8 +36,9 @@ namespace Client
                         newDc.PairedDevice = hostDevice;
                         newDc.PublicKey = hostKey;
                         newDc.Password = pwd;
+                        newDc.AccessLevel = AccessLevels.PowerfulPairedDevice;
 
-                        ConfigManager.Configuration.PairedDevices.Add(newDc);
+                        ConfigManager.Configuration.AddOrUpdatePairedDevice(newDc);
                         ConfigManager.Configuration.SetServer(newDc);
                     }
                     else
@@ -55,7 +56,13 @@ namespace Client
             {
                 LoggerManager.Log.TraceMessage(string.Format("The device {0}:{1} is already registered. No need to retry", host, port));
             }
-            LoggerManager.Log.TraceMessage("RegisterDevice() end");
+            LoggerManager.Log.TraceMessage("Device registration finished");
+        }
+
+        public bool SetupPair(Device targetDev)
+        {
+            bool ret = true;
+            return ret;
         }
     }
 }

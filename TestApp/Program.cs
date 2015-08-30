@@ -21,8 +21,8 @@ namespace TestApp
         {
             ServiceManager m = new ServiceManager();
             m.Initialize();
-            //AuditHelper h = new AuditHelper();
-            //h.RegisterDevice("Sangreal", "6789");
+            AuditHelper h = new AuditHelper();
+            h.RegisterDevice("Sangreal", "6789");
             Console.ReadKey();
             m.Deinitialize();
         }

@@ -4,6 +4,7 @@ using Configuration;
 using Encryption;
 using Interfaces.DataContracts;
 using Interfaces.Services;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,17 +41,35 @@ namespace Services
             return CurrentDevice;
         }
 
+        public bool AddOrUpdatePairedDevice(DeviceCredentials pairedDevice, string token)
+        {
+            bool ret = true;
+            AccessLevels al = ConfigManager.Configuration.GetAccessLevel(token);
+            if (al == AccessLevels.CurrentDevice || al == AccessLevels.PowerfulPairedDevice)
+            {
+                ConfigManager.Configuration.AddOrUpdatePairedDevice(pairedDevice);
+            }
+            return ret;
+        }
+
         private void ExchangeKeysWithPairedDevices()
         {
             foreach(DeviceCredentials dc in PairedDevices)
             {
                 if (!dc.PairedDevice.Equals(CurrentDevice))
                 {
-                    IAuditService s = new ClientBuilder<IAuditService>("AuditService", dc.PairedDevice.Port, dc.PairedDevice.Host).Proxy;
-                    if (s != null)
+                    try
                     {
-                        string pKey = s.ExchangeKeys(CurrentDevice, publicKey);
-                        dc.PublicKey = pKey;
+                        IAuditService s = new ClientBuilder<IAuditService>("AuditService", dc.PairedDevice.Port, dc.PairedDevice.Host).Proxy;
+                        if (s != null)
+                        {
+                            string pKey = s.ExchangeKeys(CurrentDevice, publicKey);
+                            dc.PublicKey = pKey;
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        LoggerManager.Log.TraceMessage(string.Format("The device {0} {1}:{2} is not accessible", dc.PairedDevice.Name, dc.PairedDevice.Host, dc.PairedDevice.Host));
                     }
                 }
             }
@@ -64,11 +83,11 @@ namespace Services
             return ret;
         }
 
-        public bool Authorize(Device device, int accessLvl, string token)
+        public bool Authorize(Device device, AccessLevels accessLvl, string token)
         {
             bool ret = true;
-            int al = ConfigManager.Configuration.GetAccessLevel(token);
-            if (al == 1)
+            AccessLevels al = ConfigManager.Configuration.GetAccessLevel(token);
+            if (al == AccessLevels.CurrentDevice)
             {
                 ret = ConfigManager.Configuration.SetAccessLevelForDevice(device, accessLvl);
             }
@@ -95,14 +114,14 @@ namespace Services
             {
                 dc = new DeviceCredentials();
                 dc.PairedDevice = device;
-                dc.AccessLevel = 0;
+                dc.AccessLevel = AccessLevels.NotAuthorized;
 
                 if (device == CurrentDevice && publicKey == pubKey)
                 {
                     dc.Password = Membership.GeneratePassword(Constants.PWD_LENGTH, Constants.NON_ALPHANUMERIC_CHARS_CNT);
-                    dc.AccessLevel = 1;
+                    dc.AccessLevel = AccessLevels.CurrentDevice;
                 }
-                PairedDevices.Add(dc);
+                ConfigManager.Configuration.AddOrUpdatePairedDevice(dc);
             }
 
             dc.PublicKey = pubKey;

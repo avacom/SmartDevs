@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -19,13 +20,12 @@ namespace Interfaces.DataContracts
         /// <summary>
         /// Access level:
         /// 0 - not authorized
-        /// 1 - Current device - most powerful
-        /// 2 - Paired device
+        /// 10 - Current device - most powerful
+        /// 20 - Server
+        /// 30 - Paired device
         /// </summary>
         [DataMember]
-        public int AccessLevel { get; set; }
-        [DataMember]
-        public bool Online { get; set; }
+        public AccessLevels AccessLevel { get; set; }
         [DataMember]
         public bool IsServer { get; set; }
 

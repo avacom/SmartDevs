@@ -1,4 +1,5 @@
-﻿using Interfaces.DataContracts;
+﻿using Common;
+using Interfaces.DataContracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,12 @@ namespace Interfaces.Services
         [OperationContract]
         string ExchangeKeys(Device device, string publicKey);
         [OperationContract]
-        bool Authorize(Device device, int accessLvl, string token);
+        bool Authorize(Device device, AccessLevels accessLvl, string token);
         [OperationContract]
         bool SetPassword(Device device, string oldPwdEncrypted, string newPwdEncrypted);
         [OperationContract]
         Device GetDeviceInfo();
+        [OperationContract]
+        bool AddOrUpdatePairedDevice(DeviceCredentials pairedDevice, string token);
     }
 }

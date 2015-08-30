@@ -82,6 +82,20 @@ namespace Configuration
             } 
         }
 
+        List<DeviceCredentials> _temporarySessions;
+        [XmlIgnore]
+        public List<DeviceCredentials> TemporarySessions
+        {
+            get
+            {
+                return _temporarySessions;
+            }
+            set
+            {
+                _temporarySessions = value;
+            }
+        }
+
         string _fileName;
 
         public Config(string fileName)
@@ -185,9 +199,9 @@ namespace Configuration
             return true;
         }
 
-        public int GetAccessLevel(string token)
+        public AccessLevels GetAccessLevel(string token)
         {
-            int ret = 0;
+            AccessLevels ret = 0;
             try
             {
                 Token t = AsymmetricEncryption.DecryptCredentials(token, Constants.KEY_SIZE, PrivateKey);
@@ -201,7 +215,7 @@ namespace Configuration
             {
                 LoggerManager.Log.TraceMessage("ERROR: cannot get the access level");
                 LoggerManager.Log.TraceException(ex);
-                ret = 0;
+                ret = AccessLevels.NotAuthorized;
             }
             return ret;
         }
@@ -225,15 +239,20 @@ namespace Configuration
 
         public DeviceCredentials GetPairedDevice(Device device)
         {
+            return GetPairedDevice(device, PairedDevices);
+        }
+
+        public DeviceCredentials GetPairedDevice(Device device, List<DeviceCredentials> listToSearch)
+        {
             DeviceCredentials dc = null;
             if (device != null)
             {
-                dc = PairedDevices.FirstOrDefault(pd => pd.PairedDevice.Equals(device));
+                dc = listToSearch.FirstOrDefault(pd => pd.PairedDevice.Equals(device));
             }
             return dc;
         }
 
-        public bool SetAccessLevelForDevice(Device device, int accessLvl)
+        public bool SetAccessLevelForDevice(Device device, AccessLevels accessLvl)
         {
             bool ret = true;
             DeviceCredentials pd = GetPairedDevice(device);
@@ -280,6 +299,33 @@ namespace Configuration
         public DeviceCredentials GetServer()
         {
             return PairedDevices.FirstOrDefault(dc => dc.IsServer);
+        }
+
+        public void AddOrUpdatePairedDevice(DeviceCredentials dc)
+        {
+            AddOrUpdatePairedDevice(dc, false);
+        }
+        public void AddOrUpdatePairedDevice(DeviceCredentials dc, bool temp)
+        {
+            if (dc != null)
+            {
+                List<DeviceCredentials> dcList = temp ? TemporarySessions : PairedDevices;
+
+                DeviceCredentials current = GetPairedDevice(dc.PairedDevice, dcList);
+                if (current != null)
+                {
+                    current.PairedDevice = dc.PairedDevice;
+                    current.Password = dc.Password;
+                    current.PublicKey = dc.PublicKey;
+                    current.AccessLevel = dc.AccessLevel;
+                }
+                else
+                {
+                    dcList.Add(dc);
+                }
+            }
+            if (!temp)
+                Save(_fileName);
         }
 
         public bool SetPassword(Device device, string oldPwdEncrypted, string newPwdEncrypted)
